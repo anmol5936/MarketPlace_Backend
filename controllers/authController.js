@@ -1,6 +1,6 @@
 const asyncHandler = require("express-async-handler");
-const bcryptjs = require("bcryptjs"); 
-const jwt = require("jsonwebtoken"); 
+const bcryptjs = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
 
 const signup = asyncHandler(async (req, res) => {
@@ -40,35 +40,35 @@ const signup = asyncHandler(async (req, res) => {
 });
 
 const signin = asyncHandler(async (req, res) => {
-    const { email, password } = req.body;
-  
-    if (!email || !password) {
-      res.status(400);
-      throw new Error("All fields are mandatory!");
-    }
-  
-    const user = await User.findOne({ email }); 
-    if (!user) {
-      res.status(400);
-      throw new Error("User does not exist!");
-    }
-  
-    const validPassword = bcryptjs.compareSync(password, user.password);
-  
-    if (!validPassword) {
-      res.status(400);
-      throw new Error("Invalid password!");
-    }
-  
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-  
-    const { password: pass, ...rest } = user._doc; 
-  
-    res
-      .cookie('access_token', token, { httpOnly: true })
-      .status(200)
-      .json(rest);
-  });
-  
-  module.exports = { signup, signin };
-  
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    res.status(400);
+    throw new Error("All fields are mandatory!");
+  }
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    res.status(400);
+    throw new Error("User does not exist!");
+  }
+
+  const validPassword = bcryptjs.compareSync(password, user.password);
+
+  if (!validPassword) {
+    res.status(400);
+    throw new Error("Invalid password!");
+  }
+
+  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+
+  const { password: pass, ...rest } = user._doc;
+
+  res.cookie("access_token", token, { httpOnly: true }).status(200).json(rest);
+});
+ const signout = asyncHandler(async (req, res) => {
+  res.clearCookie("access_token");
+  res.status(200).json("User has been logged out!");
+});
+
+module.exports = { signup, signin, signout };
