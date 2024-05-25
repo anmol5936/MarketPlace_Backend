@@ -14,16 +14,19 @@ const getProduct = asyncHandler(async (req, res) => {
 });
 
 const getProducts = asyncHandler(async (req, res) => {
-  const products = await Product.find();
+  const searchQuery = req.query.name;
+
+  const filter = searchQuery ? { name: { $regex: new RegExp(searchQuery, 'i') } } : {};
+
+  const products = await Product.find(filter);
 
   if (!products || products.length === 0) {
     res.status(404);
-    throw new Error("No products found");
+    throw new Error(`No products found for search query: ${searchQuery}`);
   }
 
   res.status(200).json(products);
 });
-
 
 const deleteProduct = asyncHandler(async (req, res) => {
     const product = await Product.findById(req.params.id);
@@ -42,10 +45,24 @@ const deleteProduct = asyncHandler(async (req, res) => {
     res.status(200).json({ message: "Listing has been deleted!" });
   });
 
-const  updateProduct = asyncHandler((req,res)=>{
-
-
-
-});
+  const updateProduct = asyncHandler(async (req, res) => {
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      res.status(404);
+      throw new Error("Product not found!");
+    }
+  
+    if (req.user.id !== product.userRef.toString()) {
+      res.status(401);
+      throw new Error("You can only update your own listings!");
+    }
+  
+    const updatedProduct = await Product.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true
+    });
+  
+    res.status(200).json(updatedProduct);
+  });
 
 module.exports = { addProduct, getProduct, getProducts,deleteProduct,updateProduct };

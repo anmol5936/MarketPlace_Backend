@@ -48,17 +48,19 @@ const signin = asyncHandler(async (req, res) => {
   }
 
   const user = await User.findOne({ email });
+
   if (!user) {
-    res.status(400);
-    throw new Error("User does not exist!");
+    res.status(400).json({ message: "User does not exist!" });
+    return;
   }
 
   const validPassword = bcryptjs.compareSync(password, user.password);
 
   if (!validPassword) {
-    res.status(400);
-    throw new Error("Invalid password!");
-  }
+    res.status(400).send("Invalid password!");
+    return;
+}
+
 
   const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
 
