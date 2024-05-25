@@ -21,8 +21,7 @@ const getProducts = asyncHandler(async (req, res) => {
   const products = await Product.find(filter);
 
   if (!products || products.length === 0) {
-    res.status(404);
-    throw new Error(`No products found for search query: ${searchQuery}`);
+    return res.status(404).json({ message: `No products found for search query: ${searchQuery}` });
   }
 
   res.status(200).json(products);
